@@ -1,0 +1,65 @@
+import pygame
+import sys
+import math
+import os
+import time
+
+image = pygame.image.load(sys.argv[1])
+
+display = pygame.display.set_mode((image.get_rect().width, image.get_rect().height))
+
+@ (lambda _: _())
+def main():
+    backgroundColors = ["0xffffff", "0x201c1c"]
+    colorSelection = 0
+    x = image.get_rect().width / 2
+    y = image.get_rect().height / 2
+
+    thickness = 40
+    centerBiasScale = 0.7
+
+
+    lockBubble = False
+    while True:
+        capture = False
+        display.blit(image, (0, 0))
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEMOTION:
+                x = event.pos[0]
+                y = event.pos[1]
+            elif event.type == pygame.MOUSEWHEEL:
+                thickness += event.y
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                capture = True
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    colorSelection = (colorSelection + 1) % 2
+                elif event.key == pygame.K_DOWN:
+                    colorSelection = (colorSelection - 1) % 2
+                elif event.key == pygame.K_LSHIFT:
+                    lockBubble = True
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_LSHIFT:
+                    lockBubble = False
+            elif event.type == pygame.QUIT:
+                exit(0)
+        if not lockBubble:
+            ellipseY = 0
+            if (y > image.get_rect().height / 2):
+                ellipseY = image.get_rect().height
+            centerPoint = [(x - image.get_rect().width / 2) * centerBiasScale + image.get_rect().width / 2, ellipseY]
+        outerHeight = thickness
+        outerWidth = image.get_rect().width
+        deltaToCursor = math.atan2(centerPoint[1] - y, centerPoint[0] - x)
+        p1 = [math.cos(deltaToCursor - (math.pi/2)) * (thickness / 4), math.sin(deltaToCursor - (math.pi / 2)) * (thickness / 4)]
+        p2 = [math.cos(deltaToCursor + (math.pi/2)) * (thickness / 4), math.sin(deltaToCursor + (math.pi / 2)) * (thickness / 4)]
+        p1[0] += centerPoint[0]
+        p1[1] += centerPoint[1]
+        p2[0] += centerPoint[0]
+        p2[1] += centerPoint[1]
+        pygame.draw.ellipse(display, backgroundColors[colorSelection], (0, ellipseY - outerHeight/2, outerWidth, outerHeight))
+        pygame.draw.polygon(display, backgroundColors[colorSelection], [(x, y), p1, p2])
+        pygame.display.flip()
+        if (capture):
+            pygame.image.save(display, "SPEECHBUBBLE".join(os.path.splitext(sys.argv[1])))
+            exit(0)
