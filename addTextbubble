@@ -1,3 +1,5 @@
+#!/bin/python3
+
 import pygame
 import sys
 import math
@@ -6,11 +8,14 @@ import time
 
 image = pygame.image.load(sys.argv[1])
 
+
+pygame.display.set_caption("text bubble adder")
 display = pygame.display.set_mode((image.get_rect().width, image.get_rect().height))
 
 @ (lambda _: _())
 def main():
-    backgroundColors = ["0xffffff", "0x201c1c"]
+    print("Controls:\n\tCLICK ANYWHERE TO SAVE IMAGE\n\tUse scroll wheel to change thickness of speech bubble\n\tUse arrow keys to cycle through colors [white, discord black, grey, black]\n\tHold shift to lock speech bubble in place")
+    backgroundColors = ["0xffffff", "0x201c1c", "0xb2b2b2", "0x000000"]
     colorSelection = 0
     x = image.get_rect().width / 2
     y = image.get_rect().height / 2
@@ -28,14 +33,15 @@ def main():
                 x = event.pos[0]
                 y = event.pos[1]
             elif event.type == pygame.MOUSEWHEEL:
-                thickness += event.y
+                thickness += event.y * 2
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                capture = True
+                if event.button in (1, 3):
+                    capture = True
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
-                    colorSelection = (colorSelection + 1) % 2
+                    colorSelection = (colorSelection + 1) % len(backgroundColors)
                 elif event.key == pygame.K_DOWN:
-                    colorSelection = (colorSelection - 1) % 2
+                    colorSelection = (colorSelection - 1) % len(backgroundColors)
                 elif event.key == pygame.K_LSHIFT:
                     lockBubble = True
             elif event.type == pygame.KEYUP:
